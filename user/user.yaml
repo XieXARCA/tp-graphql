@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  description: API for authentification, getting user's infos and making booking requests
+  contact:
+    name: TRAVERT Nicolas / EL HADARY Ossama
+    url: 
+    email: nicolas.travert@imt-atlantique.net / ossama.el-hadary@imt-atlantique.net
+servers:
+  - url: http://localhost:3004
+    description: Local development server
+
+
+tags:
+- name: admin
+  description: Secured Admin-only calls
+- name: dev
+  description: Operations available to regular developers
+- name: client
+  description: Standard client access and operations
+
+
+paths:
+  /user/{userid}:
+    get:
+      tags:
+        - admin
+        - client
+        - dev
+      summary: Gets user infos
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      description: Returns user information if authenticated or if an admin
+      responses:
+        "200":
+          description: User's infos retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          description: Token is invalid or user is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: User not in database
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/Error"
+
+  /login:
+    post: 
+      tags:
+        - dev
+        - admin
+        - user
+      summary: Log user 
+      description: Log user and create Token for authenticated request
+      parameters:
+        name: name
+        in: query
+        required: true
+        description: User's name
+        schema:
+          type: string
+          example: "Pam Beesly"
+      responsees:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        "403":
+          description: User ID does not match the token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: User is not in database
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  parameters:
+    UserId:
+      name: userid
+      in: path
+      required: true
+      description: Forename and lastname of a user
+      schema: 
+        type: string
+  
+  schemas:
+    User:
+      type: object
+      description: Informations about a user
+      properties: 
+        id:
+          type: string
+          format: text
+          description: user's first and lastname with an underscore in between
+          example: "chris_rivers"
+        name:
+          type: string 
+          format: text
+          description : user's first and lastname
+          example: Chris Rivers
+        admin: 
+          type: string 
+          format: text
+          description: administrator status (optional)
+          example: true
+        dev: 
+          type: string 
+          format: text
+          description: dev status (optional)
+          example: true
+        last_active:
+          type: integer
+          format: int64
+          description: timestamp of the last user activity
+    Token:
+      type: object
+      description: JWT authentication token response
+      properties:
+        access_token:
+          type: string
+          format: text
+          description: JWT access token string generated upon successful login
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIi..."
+      
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "You already have no reservation."
