@@ -1,5 +1,5 @@
 
-import json
+import json, hashlib, base64
 import time
 import requests
 #import booking_pb2
@@ -22,6 +22,8 @@ from flask_jwt_extended import (
    get_jwt
 )
 
+
+
 app = Flask(__name__)
 
 client = MongoClient("mongodb://root:example@mongo:27017/?authSource=admin")
@@ -42,11 +44,37 @@ with open('{}/data/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
 
 collection.insert_many(users)
+
+def hexhash(text):
+   return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+   body = request.get_json()
+   id       = body["id"]
+   password = body["password"]
+   name = body["name"]
+
+   if collection.find_one({ "id": id }):
+      return jsonify({ "Error": "id taken" }), 403
+
+   collection.insert_one({
+      "id": id,
+      "password": hexhash(password),
+      "name" : name
+   })
+   
+   return jsonify({ "success": "signed up" }), 200
+
+
 # Authentication route
 @app.route("/login", methods= ["POST"])
 def login():
 
    name = request.args.get("username")
+   password = request.args.get("password")
+
    query = {"name": str(name)}
    user = collection.find_one(query)
 
