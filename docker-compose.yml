@@ -4,6 +4,6 @@ services:
     context: .
     dockerfile: service/Dockerfile
     ports:
-      - "3202:3202"
+      - "3002:3002"
   # to continue
 
