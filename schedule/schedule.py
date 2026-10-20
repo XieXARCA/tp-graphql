@@ -1,116 +1,93 @@
-import grpc
+import os 
 import json
+from werkzeug.exceptions import NotFound
+from bson.json_util import dumps
 
-import schedule_pb2
-import schedule_pb2_grpc
-
-from concurrent import futures
-
-class ScheduleServicer(schedule_pb2_grpc.ScheduleServicer):
-
-    def __init__(self):
-        with open('{}/data/times.json'.format("."), "r") as jsf:
-            self.db = json.load(jsf)["schedule"]
-
-    def write(self,schedule):
-        with open('{}/data/times.json'.format("."), "w") as wfile:
-            json.dump({"schedule": schedule }, wfile)
-    
-    def remove(self,scheduled):
-        with open('{}/data/times.json'.format("."), "w") as wfile:
-            self.db.remove(scheduled)
+from pymongo import MongoClient
+from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, jwt_required, JWTManager
+from flask import Flask, request, jsonify
+from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
 
 
-    def dictionary(self,screening):
-        return {"date": screening.date, "movies": list(screening.movies)}
 
-    def get_full_schedule (self, request, context) :
-        for scheduled in self.db:
-            yield schedule_pb2.Screening(date=scheduled["date"], movies=scheduled["movies"])        
-        
-    def get_schedule_bydate(self, request, context) :
-        for scheduled in self.db :
-            if scheduled["date"] == request.date : 
-                print('Screening found!')
-                return schedule_pb2.Screening(date = scheduled["date"], movies = scheduled["movies"])
-
-        return schedule_pb2.Screening(date = "", movies = "" )
-
-    def get_schedule_from_to(self, request_iterator, context):
-
-        i = 0
-
-        From = next(request_iterator)
-        to = next(request_iterator)
-
-        schedulingTab = []
-        for scheduled in self.db:
-            if scheduled["date"] == From.date:
-                break
-            i += 1
-
-        if len(self.db) - 1 == i:
-            return schedule_pb2.Screening(date= "", movies= "") 
-
-        for scheduled in self.db[i:]:
-            schedulingTab.append(schedule_pb2.Screening(date= scheduled["date"], movies= scheduled["movies"]))
-            if scheduled["date"] == to.date :
-                break
-
-        if scheduled["date"] == to.date:
-            for scheduling in schedulingTab:
-                yield scheduling
-
-    def add_screenings(self, request, context):
-        
-        for screening in request.screenings:
-
-            inserted= False
-            for i , scheduled in enumerate(self.db):
-                    
-                if screening.date < scheduled["date"]:
-                    self.db.insert(i, self.dictionary(screening)) 
-                    self.write(self.db)
-                    inserted = True
-
-                    break
-
-                elif screening.date == scheduled["date"]: 
-                    scheduled["movies"].extend(list(screening.movies))
-                    self.write(self.db)
-                    inserted = True
-                    
-                    break
-
-            if not inserted :
-                self.db.append({"date":screening.date, "movies" : list(screening.movies)})
-                self.write(self.db)   
-                    
-        return schedule_pb2.Screenings(screenings = self.db)
-                    
-    def cancel_screenings(self, request, context):
-        
-        for screening in request.screenings:
-            for scheduled in self.db:
-                if screening.date == scheduled["date"]: 
-                    for movie in list(screening.movies):
-                        scheduled["movies"].remove(movie) 
-
-                    if not scheduled["movies"]:
-                        self.remove(scheduled)
-
-                    self.write(self.db)
-
-        return schedule_pb2.Screenings(screenings = self.db)
+app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = SECRET
+jwt = JWTManager(app)
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    schedule_pb2_grpc.add_ScheduleServicer_to_server(ScheduleServicer(), server)
-    server.add_insecure_port('[::]:3002')
-    server.start()
-    server.wait_for_termination()
+client = MongoClient(f"mongodb://root:example@mongo:{DB_PORT}/?authSource=admin")
+
+db = client["schedule"]
+collection = db["schedule"]
 
 
-if __name__ == '__main__':
-    serve()
+with open("/app/data/times.json", "r") as jsf:
+   schedule = json.load(jsf)["schedule"]
+
+if not collection.find_one():
+   collection.insert_many(schedule)
+
+
+
+# /schedule?[from][to]
+@app.route("/schedule", methods=["GET"])
+def get_schedule():
+   from_ = None
+   to = None
+   if req := request.args:
+      if "from" in req:
+         from_ = int(req["from"])
+      if "to" in req:
+         to = int(req["to"])
+
+   if from_ is None and to is None:
+      dumps(collection.find()), 200
+
+   res = []
+   for entry in collection.find():
+      date = int(entry["date"])
+      if (from_ is None or date >= from_) and (to is None or date <= to):
+         res.append(entry)
+   return dumps(res), 200
+
+@app.route("/schedule/<date>", methods=["GET"])
+def get_date(date):
+   if entry := collection.find_one({ "date": date }):
+      return dumps(entry), 200
+   return jsonify({ "error": "date not found" }), 404
+
+@app.route("/schedule/<date>", methods=["POST"])
+@jwt_required()
+def add_movies(date):
+   movies = request.get_json()["movies"]
+
+   if not get_jwt()["admin"]:
+      return jsonify({ "error": "not authorized" }), 401
+
+   query = { "date": date }
+   if entry := collection.find_one(query):
+      movies.extend(entry["movies"])
+      collection.update_one(query, { "$set": { "movies": movies }})
+   else:
+      collection.insert_one({
+         "date": date,
+         "movies": movies
+      })
+
+   return dumps(collection.find_one(query)), 200
+
+@app.route("/schedule/<date>", methods=["DELETE"])
+@jwt_required()
+def remove_date(date):
+   if not get_jwt()["admin"]:
+      return jsonify({ "error": "not authorized" }), 401
+
+   if entry := collection.find_one_and_delete({ "date": date }):
+      return dumps(entry), 200
+   return jsonify({ "error": "date not found" }), 404
+
+   
+
+if __name__ == "__main__":
+   print(f"Server running in port {PORT}")
+   app.run(host="0.0.0.0", port=PORT)
