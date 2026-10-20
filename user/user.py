@@ -20,7 +20,7 @@ from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
 
 app = Flask(__name__)
 
-client = MongoClient(f"mongodb://mongo:{DB_PORT}/?authSource=admin")
+client = MongoClient(f"mongodb://mongo:{DB_PORT}")
 
 db = client["users"]
 collection = db["users"]

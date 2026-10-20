@@ -15,7 +15,7 @@ app.config["JWT_SECRET_KEY"] = SECRET
 jwt = JWTManager(app)
 
 
-client = MongoClient(f"mongodb://mongo:{DB_PORT}/?authSource=admin")
+client = MongoClient(f"mongodb://mongo:{DB_PORT}")
 
 db = client["schedule"]
 collection = db["schedule"]
