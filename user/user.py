@@ -16,27 +16,26 @@ from flask_jwt_extended import (
    get_jwt
 )
 
-from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
+from env import USER_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
 
 app = Flask(__name__)
-
-client = MongoClient(f"mongodb://mongo:{DB_PORT}")
-
-db = client["users"]
-collection = db["users"]
-
 app.config["JWT_SECRET_KEY"] = SECRET
 app.config["JWT_TOKEN_LOCATION"]= ["headers","cookies"]
 app.config["JWT_COOKIE_SECURE"] = False
 
 jwt = JWTManager(app)
 
-HOST = '0.0.0.0'
+client = MongoClient(f"mongodb://mongo:{DB_PORT}")
+
+db = client["users"]
+collection = db["users"]
+
 
 with open('/app/data/users.json', "r") as jsf:
    users = json.load(jsf)["users"]
 
-collection.insert_many(users)
+if not collection.find_one():
+   collection.insert_many(users)
 
 def hexhash(text):
    return hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -109,4 +108,4 @@ def infos(userid):
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
-   app.run(host=HOST, port=PORT)
+   app.run(host='0.0.0.0', port=PORT)
