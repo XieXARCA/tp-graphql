@@ -2,12 +2,6 @@
 import json, hashlib, base64
 import time
 import requests
-#import booking_pb2
-#import booking_pb2_grpc
-#import movie_pb2
-#import movie_pb2_grpc
-# CALLING gRPC requests
-
 from concurrent import futures
 from pymongo import MongoClient
 from bson.json_util import dumps
@@ -22,25 +16,24 @@ from flask_jwt_extended import (
    get_jwt
 )
 
-
+from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
 
 app = Flask(__name__)
 
-client = MongoClient("mongodb://root:example@mongo:27017/?authSource=admin")
+client = MongoClient(f"mongodb://mongo:{DB_PORT}/?authSource=admin")
 
 db = client["users"]
 collection = db["users"]
 
-app.config["JWT_SECRET_KEY"] = "7oiz2wPmzQFaKxw7GwNC__5inY7i1bSKwW2MnlkgnC0"
+app.config["JWT_SECRET_KEY"] = SECRET
 app.config["JWT_TOKEN_LOCATION"]= ["headers","cookies"]
 app.config["JWT_COOKIE_SECURE"] = False
 
 jwt = JWTManager(app)
 
-PORT = 3004
 HOST = '0.0.0.0'
 
-with open('{}/data/users.json'.format("."), "r") as jsf:
+with open('/app/data/users.json', "r") as jsf:
    users = json.load(jsf)["users"]
 
 collection.insert_many(users)

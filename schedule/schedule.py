@@ -6,7 +6,7 @@ from bson.json_util import dumps
 from pymongo import MongoClient
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, jwt_required, JWTManager
 from flask import Flask, request, jsonify
-from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
+from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET
 
 
 
@@ -15,7 +15,7 @@ app.config["JWT_SECRET_KEY"] = SECRET
 jwt = JWTManager(app)
 
 
-client = MongoClient(f"mongodb://root:example@mongo:{DB_PORT}/?authSource=admin")
+client = MongoClient(f"mongodb://mongo:{DB_PORT}/?authSource=admin")
 
 db = client["schedule"]
 collection = db["schedule"]

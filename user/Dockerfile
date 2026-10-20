@@ -12,5 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # copy the app files and directories
 COPY user/ .
 
+COPY env.py .
+
 # start booking.py when the container is started
 CMD ["python", "user.py"]
