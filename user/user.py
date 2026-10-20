@@ -114,7 +114,10 @@ def get_user_bookings(userid):
       query = f"""
       {{                                       
          booking_from_user_id(user_id: \"{userid}\"){{ 
-            dates                                       
+            dates {{
+               date
+               movies
+            }}                                      
          }}                                             
       }}
       """
@@ -124,7 +127,7 @@ def get_user_bookings(userid):
       if not res.ok:
          return make_response(jsonify({"Error":"Bookings not found"}), 404)
       else:
-         return make_response(dumps(res), 200)
+         return make_response(jsonify(res.json()), 200)
 
    return make_response(jsonify({"Error":"not authorized"}), 403)
 

@@ -36,7 +36,7 @@ def book_date(_, info, user_id, date, movie_id):
         title                           \
       }}                                \
     }}"
-    res = requests.post(f"http://localhost:{MOVIE_PORT}/graphql", json={ "query": query })
+    res = requests.post(f"http://movie:{MOVIE_PORT}/graphql", json={ "query": query })
 
     if not res.ok or not res.json()["data"]["movie_by_id"]:
         return
