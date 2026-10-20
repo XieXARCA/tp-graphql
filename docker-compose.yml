@@ -8,8 +8,8 @@ services:
       
   user:
     build: 
-    context: .
-    dockerfile: user/Dockerfile
+      context: .
+      dockerfile: user/Dockerfile
     ports:
       - "3004:3004"
   

@@ -9,6 +9,8 @@ import requests
 # CALLING gRPC requests
 
 from concurrent import futures
+from pymongo import MongoClient
+from bson.json_util import dumps
 from werkzeug.exceptions import NotFound
 from flask import Flask, render_template, request, jsonify, make_response
 from flask_jwt_extended import (
@@ -22,6 +24,10 @@ from flask_jwt_extended import (
 
 app = Flask(__name__)
 
+client = MongoClient("mongodb://root:example@mongo:27017/?authSource=admin")
+
+db = client["users"]
+collection = db["users"]
 
 app.config["JWT_SECRET_KEY"] = "7oiz2wPmzQFaKxw7GwNC__5inY7i1bSKwW2MnlkgnC0"
 app.config["JWT_TOKEN_LOCATION"]= ["headers","cookies"]
@@ -35,27 +41,25 @@ HOST = '0.0.0.0'
 with open('{}/data/users.json'.format("."), "r") as jsf:
    users = json.load(jsf)["users"]
 
-
+collection.insert_many(users)
 # Authentication route
 @app.route("/login", methods= ["POST"])
 def login():
 
    name = request.args.get("username")
+   query = {"name": str(name)}
+   user = collection.find_one(query)
 
-   for user in users:
-      if user["name"] == name : 
-         additional_claims = {"admin": user.get("admin", False), "dev": user.get("dev", False)}
-
-         token = create_access_token(identity = user["id"], additional_claims = additional_claims)
-         response = make_response(jsonify(token), 200)
-         set_access_cookies(response, token)
-
-         with open('{}/data/users.json'.format("."), "w") as wfile:
-
-               last_active = int(time.time())
-               user["last_active"] = last_active
-               json.dump({"users":users}, wfile)
-         return response
+   if user :
+      additional_claims = {"admin": user.get("admin", False), "dev": user.get("dev", False)}
+      token = create_access_token(identity = user["id"], additional_claims = additional_claims)
+      
+      last_active = int(time.time())
+      user["last_active"] = last_active
+      collection.replace_one(query , user)
+      response = make_response(jsonify(token), 200)
+      set_access_cookies(response, token)
+      return response
    return make_response(jsonify({"Error":"User not in database"}), 400)
 
 
@@ -70,9 +74,11 @@ def infos(userid):
    if get_jwt_identity() != userid and not is_admin:
       return make_response(jsonify({"Error": "Access denied"}), 403)
 
-   for user in users:
-      if user["id"] == userid:
-         return make_response(jsonify(user), 200)
+   query = {"id": str(userid)}
+   user = collection.find_one(query)
+
+   if user :
+      return make_response(dumps(user), 200)
 
    return make_response(jsonify({"Error":"User in not in database"}), 404)
 
