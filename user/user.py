@@ -16,7 +16,7 @@ from flask_jwt_extended import (
    get_jwt
 )
 
-from env import USER_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD
+from env import USER_PORT as PORT, DB_PORT, SECRET, ADMIN_PASSWORD, BOOKING_PORT
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = SECRET
@@ -67,7 +67,7 @@ def login():
    name = request.args.get("username")
    password = request.args.get("password")
 
-   query = {"name": str(name)}
+   query = {"name": str(name), "password": hexhash(password)}
    user = collection.find_one(query)
 
    if user :
@@ -102,9 +102,32 @@ def infos(userid):
 
    return make_response(jsonify({"Error":"User in not in database"}), 404)
 
+@app.route("/user/booking/<userid>", methods= ['GET'])
+@jwt_required()
+def get_user_bookings(userid):
 
-# CALLING GraphQL requests 
-# todo to complete
+   claims = get_jwt()
+   is_admin = claims.get("admin", False)
+
+   if get_jwt_identity() == userid or is_admin:
+      
+      query = f"""
+      {{                                       
+         booking_from_user_id(user_id: \"{userid}\"){{ 
+            dates                                       
+         }}                                             
+      }}
+      """
+
+      res = requests.post(f"http://booking:{BOOKING_PORT}/graphql", json= {"query": query})
+
+      if not res.ok:
+         return make_response(jsonify({"Error":"Bookings not found"}), 404)
+      else:
+         return make_response(dumps(res), 200)
+
+   return make_response(jsonify({"Error":"not authorized"}), 403)
+
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
