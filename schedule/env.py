@@ -1,0 +1,7 @@
+SCHEDULE_PORT = 3002
+
+
+DB_PORT = 27017
+
+SECRET = "six-seven"
+ADMIN_PASSWORD = "pipebomb"
