@@ -1,16 +1,16 @@
-FROM python
+FROM python:3.12-slim
 # can you find a lighter image?
 
 WORKDIR /app
 
 # copy the requirements file in the workdir
-RUN
+COPY requirements.txt .
 
 # install the Python requirements
-RUN
+RUN pip install --no-cache-dir -r requirements.txt
 
 # copy the app files and directories
-RUN
+COPY user/ .
 
-# start movie.py when the container is started
-CMD 
+# start booking.py when the container is started
+CMD ["python", "user.py"]
