@@ -6,7 +6,7 @@ from bson.json_util import dumps
 from pymongo import MongoClient
 from flask_jwt_extended import create_access_token, get_jwt_identity, get_jwt, jwt_required, JWTManager
 from flask import Flask, request, jsonify
-from env import USER_PORT as PORT, DB_PORT, SECRET
+from env import SCHEDULE_PORT as PORT, DB_PORT, SECRET
 
 
 
