@@ -1,7 +1,9 @@
 services:
   movie:
-    build: ./movie/
+    build: 
+    context: .
+    dockerfile: service/Dockerfile
     ports:
-      - "3200:3200"
+      - "3202:3202"
   # to continue
 
