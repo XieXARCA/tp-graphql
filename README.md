@@ -1,6 +1,7 @@
 # UE-AD-A1-MIXTE
 
 commandes:
+python -m venv .venv
 
 .venv\Scripts\activate
 
