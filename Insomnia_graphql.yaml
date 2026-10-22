@@ -1,0 +1,328 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: TP graphql
+meta:
+  id: wrk_a71b971e0a4349aab4557d12e940adb2
+  created: 1791293269623
+  modified: 1791293269623
+  description: ""
+collection:
+  - url: http://127.0.0.1:3203/login
+    name: login as admin
+    meta:
+      id: req_f12ca0b508d544e296e8c829becb4214
+      created: 1791987170838
+      modified: 1792568903847
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693902
+    method: POST
+    parameters:
+      - name: username
+        value: Ahmed Fawzi
+        description: ""
+        disabled: false
+      - name: password
+        value: vz7M!3W]TTUcq(8
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3203/user/ahmed_fawzi
+    name: infos
+    meta:
+      id: req_a0452f628a3a43088b9dede8d5c3aeb8
+      created: 1791987369597
+      modified: 1792568687140
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693877
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3203/signup
+    name: signup as admin
+    meta:
+      id: req_9dea4381fe9c4a7da8eb3a0f9b32d2d2
+      created: 1792502525100
+      modified: 1792565817796
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693952
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"id": "ahmed_fawzi",
+        	"name": "Ahmed Fawzi",
+        	"password":"vz7M!3W]TTUcq(8",
+        	"admin": "true"
+        	
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3202/schedule
+    name: get schedule from to
+    meta:
+      id: req_58b1eca1e0074f15b5e139035a1037b5
+      created: 1792518114597
+      modified: 1792568803229
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693873.875
+    method: GET
+    parameters:
+      - name: from
+        value: "20261021"
+        description: ""
+        disabled: true
+      - name: to
+        value: "20261020"
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3202/schedule/20261021
+    name: add screening to schedule
+    meta:
+      id: req_cc8ebf17812146c8ab82a3e4a49097f1
+      created: 1792518612181
+      modified: 1792569068549
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693870.75
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"movies" : ["39ab85e5-5e8e-4dc5-afea-65dc368bd7ab"]
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication:
+      type: bearer
+      token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc5MjU2OTA1NywianRpIjoiOGIzYzY4MWYtMzYxYi00ZTAxLThlNjctNzhiNDczMjBjMzgzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImRvdW5pYV9mYXd6aSIsIm5iZiI6MTc5MjU2OTA1NywiY3NyZiI6IjAxMWFmZTY5LWE4YzYtNDRkYS05MDZmLWUyYWI0ZWYxZTdhZCIsImV4cCI6MTc5MjU2OTk1NywiYWRtaW4iOmZhbHNlLCJkZXYiOmZhbHNlfQ.6KDyuXWbWz0U28MlHU_GwptP2pJXIXoTarxNkvtJqyE
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3200/graphql
+    name: movie service graphql( check actors)
+    meta:
+      id: req_0e4831e657194a4db12f5a4b75a8fab9
+      created: 1792528160695
+      modified: 1792568856434
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693872.3125
+    method: POST
+    body:
+      mimeType: application/graphql
+      text: '{"query":"query {\n  movie_by_id(id:
+        \"39ab85e5-5e8e-4dc5-afea-65dc368bd7ab\") {\n\t\ttitle\n    actors
+        {\n      id\n      firstname\n      lastname\n      birthyear\n\t\t\tfilms
+        {\n\t\t\t\ttitle\n\t\t\t}\n    }\n  }\n}"}'
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3201/graphql
+    name: booking service graphql(add bookings)
+    meta:
+      id: req_86a8f18afedb4dce9bddebbd369d561d
+      created: 1792528198084
+      modified: 1792569010256
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693864.5
+    method: POST
+    body:
+      mimeType: application/graphql
+      text: '{"query":"mutation {\n  book_date(\n    user_id:
+        \"ahmed_fawzi\"\n    date: \"20261021\"\n    movie_id: \"xx\"\n  )
+        {\n    userid\n    dates {\n      date\n      movies\n    }\n  }\n}"}'
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3203/user/booking/ahmed_fawzi
+    name: get user bookings
+    meta:
+      id: req_3e5215c7b41c40e7bde86a640742cd84
+      created: 1792529693852
+      modified: 1792569025303
+      isPrivate: false
+      description: ""
+      sortKey: -1792529693852
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3203/signup
+    name: signup as non admin
+    meta:
+      id: req_50260dc4c03c41d3bad26e57682f4eae
+      created: 1792565812556
+      modified: 1792565954878
+      isPrivate: false
+      description: ""
+      sortKey: -1792565910996
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"id": "dounia_fawzi",
+        	"name": "Dounia Fawzi",
+        	"password":"vz7M!456TTUcq(8"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://127.0.0.1:3203/login
+    name: login as non admin
+    meta:
+      id: req_0329c67009e14d13aaac77e529ae050a
+      created: 1792565910896
+      modified: 1792566142184
+      isPrivate: false
+      description: ""
+      sortKey: -1792565910896
+    method: POST
+    parameters:
+      - name: username
+        value: Dounia Fawzi
+        description: ""
+        disabled: false
+      - name: password
+        value: vz7M!456TTUcq(8
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_8684dee1d6ae004e0aa6c540402cb3c37cfeb734
+    created: 1791293269627
+    modified: 1792569057620
+  cookies:
+    - id: 53e1cfb4-1e07-440f-9632-46f32fed06f9
+      key: access_token_cookie
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc5MjU2OTA1NywianRpIjoiOGIzYzY4MWYtMzYxYi00ZTAxLThlNjctNzhiNDczMjBjMzgzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImRvdW5pYV9mYXd6aSIsIm5iZiI6MTc5MjU2OTA1NywiY3NyZiI6IjAxMWFmZTY5LWE4YzYtNDRkYS05MDZmLWUyYWI0ZWYxZTdhZCIsImV4cCI6MTc5MjU2OTk1NywiYWRtaW4iOmZhbHNlLCJkZXYiOmZhbHNlfQ.6KDyuXWbWz0U28MlHU_GwptP2pJXIXoTarxNkvtJqyE
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: true
+      hostOnly: true
+    - id: c59c13d9-a4f3-4091-87b7-59909d55f88c
+      key: csrf_access_token
+      value: 011afe69-a8c6-44da-906f-e2ab4ef1e7ad
+      domain: 127.0.0.1
+      path: /
+      secure: false
+      httpOnly: false
+      hostOnly: true
+environments:
+  name: Base Environment
+  meta:
+    id: env_8684dee1d6ae004e0aa6c540402cb3c37cfeb734
+    created: 1791293269625
+    modified: 1791294502307
+    isPrivate: false
+  subEnvironments:
+    - name: New Environment
+      meta:
+        id: env_2243a0e79c2d46789df0da3edef6e0b4
+        created: 1791294505533
+        modified: 1791294505533
+        isPrivate: false
+        sortKey: 1791294505533
+    - name: New Environment
+      meta:
+        id: env_24a9bbcf812c42fc9fa8ee3888200f65
+        created: 1791294506082
+        modified: 1791294506082
+        isPrivate: false
+        sortKey: 1791294506082
+    - name: New Environment
+      meta:
+        id: env_88c75152058a40b58dcf467cd03353d8
+        created: 1791294507246
+        modified: 1791294507246
+        isPrivate: false
+        sortKey: 1791294507246
+    - name: New Environment
+      meta:
+        id: env_3f369803b25e416cb3be411d900a174a
+        created: 1791294507713
+        modified: 1791294507713
+        isPrivate: false
+        sortKey: 1791294507713

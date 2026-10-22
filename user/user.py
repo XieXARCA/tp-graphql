@@ -48,13 +48,16 @@ def signup():
    password = body["password"]
    name = body["name"]
 
+   
+
    if collection.find_one({ "id": id }):
       return jsonify({ "Error": "id taken" }), 403
 
    collection.insert_one({
       "id": id,
       "password": hexhash(password),
-      "name" : name
+      "name" : name,
+      "admin": body.get("admin", False)
    })
    
    return jsonify({ "success": "signed up" }), 200
